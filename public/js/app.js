@@ -1969,10 +1969,45 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   mounted: function mounted() {
+    var _this = this;
+
     this.fetchData();
     this.fetchWeatherForecast();
+    var placesAutocomplete = places({
+      appId: "plP3ZLNMZ42G",
+      apiKey: "1e760015286e36a4f212b640c79a20bd",
+      container: document.querySelector("#address")
+    }).configure({
+      type: "city",
+      aroundLatLngViaIP: false
+    });
+    var $address = document.querySelector("#address-value");
+    placesAutocomplete.on("change", function (e) {
+      $address.textContent = e.suggestion.value;
+      _this.location.name = "".concat(e.suggestion.name, ", ").concat(e.suggestion.country);
+      _this.location.lat = e.suggestion.latlng.lat;
+      _this.location.lon = e.suggestion.latlng.lng;
+    });
+    placesAutocomplete.on("clear", function () {
+      $address.textContent = "none";
+    });
+  },
+  watch: {
+    location: {
+      handler: function handler(newValue, oldValue) {
+        this.fetchData();
+        this.fetchWeatherForecast();
+      },
+      deep: true
+    }
   },
   data: function data() {
     return {
@@ -1992,25 +2027,25 @@ __webpack_require__.r(__webpack_exports__);
   },
   methods: {
     fetchData: function fetchData() {
-      var _this = this;
+      var _this2 = this;
 
       fetch("/api/weather?lat=".concat(this.location.lat, "&lon=").concat(this.location.lon)).then(function (response) {
         return response.json();
       }).then(function (data) {
-        _this.currentTemperature.actual = Math.round(data.main.temp);
-        _this.currentTemperature.feels = Math.round(data.main.feels_like);
-        _this.currentTemperature.summary = data.weather[0].description;
-        _this.currentTemperature.icon = "http://openweathermap.org/img/w/".concat(data.weather[0].icon, ".png");
+        _this2.currentTemperature.actual = Math.round(data.main.temp);
+        _this2.currentTemperature.feels = Math.round(data.main.feels_like);
+        _this2.currentTemperature.summary = data.weather[0].description;
+        _this2.currentTemperature.icon = "http://openweathermap.org/img/w/".concat(data.weather[0].icon, ".png");
         console.log(data);
       });
     },
     fetchWeatherForecast: function fetchWeatherForecast() {
-      var _this2 = this;
+      var _this3 = this;
 
       fetch("/api/weather-forecast?lat=".concat(this.location.lat, "&lon=").concat(this.location.lon)).then(function (response) {
         return response.json();
       }).then(function (data) {
-        _this2.daily = data.list;
+        _this3.daily = data.list;
         console.log(data);
       });
     },
@@ -37683,7 +37718,15 @@ var staticRenderFns = [
     var _h = _vm.$createElement
     var _c = _vm._self._c || _h
     return _c("div", { staticClass: "places-input text-gray-800" }, [
-      _c("input", { staticClass: "w-full", attrs: { type: "text" } })
+      _c("input", {
+        staticClass: "w-full h-10 rounded mb-2",
+        attrs: { type: "search", id: "address", placeholder: "Search a city" }
+      }),
+      _vm._v(" "),
+      _c("p", [
+        _vm._v("Selected: "),
+        _c("strong", { attrs: { id: "address-value" } }, [_vm._v("none")])
+      ])
     ])
   }
 ]

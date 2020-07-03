@@ -1,7 +1,13 @@
 <template>
     <div class="text-white mb-8">
         <div class="places-input text-gray-800">
-            <input type="text" class="w-full" />
+            <input
+                type="search"
+                id="address"
+                placeholder="Search a city"
+                class="w-full h-10 rounded mb-2"
+            />
+            <p>Selected: <strong id="address-value">none</strong></p>
         </div>
         <div
             class="weather-container font-sans w-128 max-w-lg rounded-lg overflow-hidden bg-gray-900 shadow-lg mt-4"
@@ -64,6 +70,34 @@ export default {
     mounted() {
         this.fetchData();
         this.fetchWeatherForecast();
+
+        const placesAutocomplete = places({
+            appId: "plP3ZLNMZ42G",
+            apiKey: "1e760015286e36a4f212b640c79a20bd",
+            container: document.querySelector("#address")
+        }).configure({
+            type: "city",
+            aroundLatLngViaIP: false
+        });
+        const $address = document.querySelector("#address-value");
+        placesAutocomplete.on("change", e => {
+            $address.textContent = e.suggestion.value;
+            this.location.name = `${e.suggestion.name}, ${e.suggestion.country}`;
+            this.location.lat = e.suggestion.latlng.lat;
+            this.location.lon = e.suggestion.latlng.lng;
+        });
+        placesAutocomplete.on("clear", function() {
+            $address.textContent = "none";
+        });
+    },
+    watch: {
+        location: {
+            handler(newValue, oldValue) {
+                this.fetchData();
+                this.fetchWeatherForecast();
+            },
+            deep: true
+        }
     },
     data() {
         return {
