@@ -2009,6 +2009,13 @@ __webpack_require__.r(__webpack_exports__);
       deep: true
     }
   },
+  computed: {
+    dailyFiveDays: function dailyFiveDays() {
+      return this.daily.filter(function (day, index) {
+        return index < 5;
+      });
+    }
+  },
   data: function data() {
     return {
       daily: [],
@@ -37666,7 +37673,7 @@ var render = function() {
             staticClass:
               "weather-forecast text-sm bg-gray-800 px-6 py-8 overflow-hidden"
           },
-          _vm._l(_vm.daily, function(day, index) {
+          _vm._l(_vm.dailyFiveDays, function(day, index) {
             return _c(
               "div",
               {

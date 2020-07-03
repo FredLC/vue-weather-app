@@ -39,7 +39,7 @@
             >
                 <div
                     class="flex items-center"
-                    v-for="(day, index) in daily"
+                    v-for="(day, index) in dailyFiveDays"
                     :key="day.time"
                     :class="{ 'mt-8': index > 0 }"
                 >
@@ -97,6 +97,11 @@ export default {
                 this.fetchWeatherForecast();
             },
             deep: true
+        }
+    },
+    computed: {
+        dailyFiveDays() {
+            return this.daily.filter((day, index) => index < 5);
         }
     },
     data() {
