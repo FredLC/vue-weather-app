@@ -11,51 +11,47 @@
             >
                 <div class="flex items-center">
                     <div>
-                        <div class="text-6xl font-semibold">24°C</div>
-                        <div>Feels like 29°C</div>
+                        <div class="text-6xl font-semibold">
+                            {{ currentTemperature.actual }}°C
+                        </div>
+                        <div>Feels like {{ currentTemperature.feels }}°C</div>
                     </div>
                     <div class="mx-5">
-                        <div class="font-semibold">Cloudy</div>
-                        <div>Gatineau, Quebec</div>
+                        <div class="font-semibold">
+                            {{ currentTemperature.summary }}
+                        </div>
+                        <div>{{ location.name }}</div>
                     </div>
                 </div>
-                <div>Icon</div>
+                <div>
+                    <img :src="currentTemperature.icon" alt="weather icon" />
+                </div>
             </div>
 
             <div
                 class="weather-forecast text-sm bg-gray-800 px-6 py-8 overflow-hidden"
             >
-                <div class="flex items-center">
-                    <div class="w-1/6 text-lg text-gray-200">MON</div>
+                <div
+                    class="flex items-center"
+                    v-for="(day, index) in daily"
+                    :key="day.time"
+                    :class="{ 'mt-8': index > 0 }"
+                >
+                    <div class="w-1/6 text-lg text-gray-200">
+                        {{ toDayOfWeek(day.dt) }}
+                    </div>
                     <div class="w-4/6 px-4 flex items-center">
-                        <div>Icon</div>
-                        <div class="ml-3">Cloudy with a chance of showers</div>
+                        <div>
+                            <img
+                                :src="getWeatherIcon(day.weather[0].icon)"
+                                alt="weather icon"
+                            />
+                        </div>
+                        <div class="ml-3">{{ day.weather[0].description }}</div>
                     </div>
                     <div class="w-1/6 text-right">
-                        <div>30°C</div>
-                        <div>22°C</div>
-                    </div>
-                </div>
-                <div class="flex items-center mt-8">
-                    <div class="w-1/6 text-lg text-gray-200">MON</div>
-                    <div class="w-4/6 px-4 flex items-center">
-                        <div>Icon</div>
-                        <div class="ml-3">Cloudy with a chance of showers</div>
-                    </div>
-                    <div class="w-1/6 text-right">
-                        <div>30°C</div>
-                        <div>22°C</div>
-                    </div>
-                </div>
-                <div class="flex items-center mt-8">
-                    <div class="w-1/6 text-lg text-gray-200">MON</div>
-                    <div class="w-4/6 px-4 flex items-center">
-                        <div>Icon</div>
-                        <div class="ml-3">Cloudy with a chance of showers</div>
-                    </div>
-                    <div class="w-1/6 text-right">
-                        <div>30°C</div>
-                        <div>22°C</div>
+                        <div>{{ Math.round(day.temp.max) }}°C</div>
+                        <div>{{ Math.round(day.temp.min) }}°C</div>
                     </div>
                 </div>
             </div>
@@ -64,5 +60,63 @@
 </template>
 
 <script>
-export default {};
+export default {
+    mounted() {
+        this.fetchData();
+        this.fetchWeatherForecast();
+    },
+    data() {
+        return {
+            daily: [],
+            currentTemperature: {
+                actual: "",
+                feels: "",
+                summary: "",
+                icon: ""
+            },
+            location: {
+                name: "Montreal, QC",
+                lat: 45.5016,
+                lon: -73.5672
+            }
+        };
+    },
+    methods: {
+        fetchData() {
+            fetch(
+                `/api/weather?lat=${this.location.lat}&lon=${this.location.lon}`
+            )
+                .then(response => response.json())
+                .then(data => {
+                    this.currentTemperature.actual = Math.round(data.main.temp);
+                    this.currentTemperature.feels = Math.round(
+                        data.main.feels_like
+                    );
+                    this.currentTemperature.summary =
+                        data.weather[0].description;
+                    this.currentTemperature.icon = `http://openweathermap.org/img/w/${data.weather[0].icon}.png`;
+                    console.log(data);
+                });
+        },
+        fetchWeatherForecast() {
+            fetch(
+                `/api/weather-forecast?lat=${this.location.lat}&lon=${this.location.lon}`
+            )
+                .then(response => response.json())
+                .then(data => {
+                    this.daily = data.list;
+                    console.log(data);
+                });
+        },
+        toDayOfWeek(timestamp) {
+            const newDate = new Date(timestamp * 1000);
+            const days = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
+
+            return days[newDate.getDay()];
+        },
+        getWeatherIcon(iconId) {
+            return `http://openweathermap.org/img/w/${iconId}.png`;
+        }
+    }
+};
 </script>
