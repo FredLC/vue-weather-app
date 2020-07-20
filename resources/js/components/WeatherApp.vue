@@ -159,3 +159,21 @@ export default {
     }
 };
 </script>
+
+<style>
+.video-background {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    width: 100vw;
+    height: auto;
+    z-index: -1;
+}
+
+video {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+</style>
